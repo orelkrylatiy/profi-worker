@@ -143,7 +143,7 @@
       "db_read_error": false,
       "events_today": {
         "candidates_created": 2,
-        "chat_replies": 0,
+        "chat_replies": 1,
         "chat_send_failed": 0,
         "details_ready": 2,
         "draft_sources": {},
@@ -190,14 +190,14 @@
         "availability_incidents": 0,
         "canonical_log_files": 3,
         "event_groups": {
-          "operational": 1,
-          "recovery": 1
+          "operational": 2,
+          "recovery": 2
         },
         "events": {
-          "supervisor_start": 1,
-          "worker_start": 1
+          "supervisor_start": 2,
+          "worker_start": 2
         },
-        "last_seen_at": "2026-09-16T21:27:43",
+        "last_seen_at": "2026-09-16T21:31:46",
         "sources_seen_today": [
           "supervisor",
           "worker"
@@ -285,7 +285,7 @@
       "db_read_error": false,
       "events_today": {
         "candidates_created": 25,
-        "chat_replies": 1,
+        "chat_replies": 3,
         "chat_send_failed": 0,
         "details_ready": 25,
         "draft_sources": {
@@ -338,15 +338,15 @@
         "canonical_log_files": 3,
         "event_groups": {
           "errors": 4,
-          "operational": 1,
-          "recovery": 1
+          "operational": 2,
+          "recovery": 2
         },
         "events": {
           "feed_ambiguous": 4,
-          "supervisor_start": 1,
-          "worker_start": 1
+          "supervisor_start": 2,
+          "worker_start": 2
         },
-        "last_seen_at": "2026-09-16T21:28:34",
+        "last_seen_at": "2026-09-16T21:31:39",
         "sources_seen_today": [
           "supervisor",
           "worker"
@@ -377,8 +377,8 @@
           "llm": 3
         },
         "drafts_generated": 3,
-        "feed_new_orders": 37,
-        "feed_orders_seen": 43,
+        "feed_new_orders": 40,
+        "feed_orders_seen": 46,
         "injection_guard": 0,
         "missing_payment_records": 0,
         "needs_human": 0,
@@ -422,16 +422,16 @@
         "canonical_log_files": 2,
         "event_groups": {
           "errors": 1,
-          "operational": 2,
-          "recovery": 1
+          "operational": 3,
+          "recovery": 2
         },
         "events": {
           "feed_capture_error": 1,
-          "supervisor_start": 1,
+          "supervisor_start": 2,
           "tab_hygiene": 1,
-          "worker_start": 1
+          "worker_start": 2
         },
-        "last_seen_at": "2026-09-16T21:15:46",
+        "last_seen_at": "2026-09-16T21:31:39",
         "sources_seen_today": [
           "supervisor",
           "worker"
@@ -441,22 +441,22 @@
       }
     }
   },
-  "code_revision": "dcdc73033074",
+  "code_revision": "4a49e6d5adb6",
   "date": "2026-09-16",
-  "generated_at": "2026-09-16T21:30:13+05:00",
+  "generated_at": "2026-09-16T22:01:11+05:00",
   "logs": {
     "availability_incidents": 2,
     "event_groups": {
       "errors": 5,
-      "operational": 4,
-      "recovery": 3
+      "operational": 7,
+      "recovery": 6
     },
     "events": {
       "feed_ambiguous": 4,
       "feed_capture_error": 1,
-      "supervisor_start": 3,
+      "supervisor_start": 6,
       "tab_hygiene": 1,
-      "worker_start": 3
+      "worker_start": 6
     },
     "files_scanned": 12,
     "ignored_diagnostic_files": 3,
@@ -465,7 +465,7 @@
       "error": 5,
       "warning": 5
     },
-    "lines_for_day": 715
+    "lines_for_day": 756
   },
   "privacy": {
     "aggregate_only": true,
@@ -493,15 +493,15 @@
     "db_read_errors": 0,
     "events_today": {
       "candidates_created": 34,
-      "chat_replies": 1,
+      "chat_replies": 4,
       "chat_send_failed": 0,
       "details_ready": 34,
       "draft_sources": {
         "llm": 16
       },
       "drafts_generated": 16,
-      "feed_new_orders": 100,
-      "feed_orders_seen": 124,
+      "feed_new_orders": 103,
+      "feed_orders_seen": 127,
       "injection_guard": 0,
       "missing_payment_records": 0,
       "needs_human": 0,
@@ -528,8 +528,8 @@
       "availability_incidents": 2,
       "event_groups": {
         "errors": 5,
-        "operational": 4,
-        "recovery": 3
+        "operational": 7,
+        "recovery": 6
       }
     }
   }

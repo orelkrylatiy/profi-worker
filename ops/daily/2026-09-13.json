@@ -130,26 +130,26 @@
     },
     "info": {
       "cohort_first_seen_today": {
-        "candidates": 2,
+        "candidates": 0,
         "client_replied": 0,
-        "details_ready": 2,
+        "details_ready": 0,
         "drafts_generated": 0,
-        "reply_yield_pct": 0.0,
+        "reply_yield_pct": null,
         "responses_failed": 0,
         "responses_sent": 0,
-        "responses_skipped": 2,
+        "responses_skipped": 0,
         "responses_unknown": 0
       },
       "db_read_error": false,
       "events_today": {
-        "candidates_created": 2,
-        "chat_replies": 1,
+        "candidates_created": 0,
+        "chat_replies": 0,
         "chat_send_failed": 0,
-        "details_ready": 2,
+        "details_ready": 0,
         "draft_sources": {},
         "drafts_generated": 0,
-        "feed_new_orders": 23,
-        "feed_orders_seen": 32,
+        "feed_new_orders": 0,
+        "feed_orders_seen": 0,
         "injection_guard": 0,
         "missing_payment_records": 0,
         "needs_human": 0,
@@ -171,9 +171,9 @@
       },
       "latency_sec": {
         "first_seen_to_details": {
-          "count": 2,
-          "p50": 6,
-          "p90": 7
+          "count": 0,
+          "p50": null,
+          "p90": null
         },
         "first_seen_to_draft": {
           "count": 0,
@@ -189,21 +189,12 @@
       "runtime": {
         "availability_incidents": 0,
         "canonical_log_files": 3,
-        "event_groups": {
-          "operational": 2,
-          "recovery": 2
-        },
-        "events": {
-          "supervisor_start": 2,
-          "worker_start": 2
-        },
-        "last_seen_at": "2026-09-16T21:31:46",
-        "sources_seen_today": [
-          "supervisor",
-          "worker"
-        ],
-        "supervisor_seen_today": true,
-        "worker_seen_today": true
+        "event_groups": {},
+        "events": {},
+        "last_seen_at": null,
+        "sources_seen_today": [],
+        "supervisor_seen_today": false,
+        "worker_seen_today": false
       }
     },
     "info-2": {
@@ -272,38 +263,34 @@
     },
     "lang": {
       "cohort_first_seen_today": {
-        "candidates": 25,
-        "client_replied": 1,
-        "details_ready": 25,
-        "drafts_generated": 13,
-        "reply_yield_pct": 4.0,
-        "responses_failed": 3,
-        "responses_sent": 13,
-        "responses_skipped": 9,
+        "candidates": 0,
+        "client_replied": 0,
+        "details_ready": 0,
+        "drafts_generated": 0,
+        "reply_yield_pct": null,
+        "responses_failed": 0,
+        "responses_sent": 0,
+        "responses_skipped": 0,
         "responses_unknown": 0
       },
       "db_read_error": false,
       "events_today": {
-        "candidates_created": 25,
-        "chat_replies": 3,
+        "candidates_created": 0,
+        "chat_replies": 0,
         "chat_send_failed": 0,
-        "details_ready": 25,
-        "draft_sources": {
-          "llm": 13
-        },
-        "drafts_generated": 13,
-        "feed_new_orders": 40,
-        "feed_orders_seen": 49,
+        "details_ready": 0,
+        "draft_sources": {},
+        "drafts_generated": 0,
+        "feed_new_orders": 0,
+        "feed_orders_seen": 0,
         "injection_guard": 0,
         "missing_payment_records": 0,
         "needs_human": 0,
         "recorded_paid_rub": 0,
-        "response_modes": {
-          "commission": 13
-        },
-        "responses_sent": 13,
+        "response_modes": {},
+        "responses_sent": 0,
         "responses_unknown": 0,
-        "sends_started": 13
+        "sends_started": 0
       },
       "inventory_now": {
         "details_errors": 30,
@@ -318,77 +305,62 @@
       },
       "latency_sec": {
         "first_seen_to_details": {
-          "count": 25,
-          "p50": 7,
-          "p90": 8
+          "count": 0,
+          "p50": null,
+          "p90": null
         },
         "first_seen_to_draft": {
-          "count": 13,
-          "p50": 39,
-          "p90": 54
+          "count": 0,
+          "p50": null,
+          "p90": null
         },
         "first_seen_to_sent": {
-          "count": 13,
-          "p50": 92,
-          "p90": 104
+          "count": 0,
+          "p50": null,
+          "p90": null
         }
       },
       "runtime": {
-        "availability_incidents": 1,
+        "availability_incidents": 0,
         "canonical_log_files": 3,
-        "event_groups": {
-          "errors": 4,
-          "operational": 2,
-          "recovery": 2
-        },
-        "events": {
-          "feed_ambiguous": 4,
-          "supervisor_start": 2,
-          "worker_start": 2
-        },
-        "last_seen_at": "2026-09-16T21:31:39",
-        "sources_seen_today": [
-          "supervisor",
-          "worker"
-        ],
-        "supervisor_seen_today": true,
-        "worker_seen_today": true
+        "event_groups": {},
+        "events": {},
+        "last_seen_at": null,
+        "sources_seen_today": [],
+        "supervisor_seen_today": false,
+        "worker_seen_today": false
       }
     },
     "profi3": {
       "cohort_first_seen_today": {
-        "candidates": 7,
+        "candidates": 0,
         "client_replied": 0,
-        "details_ready": 7,
-        "drafts_generated": 3,
-        "reply_yield_pct": 0.0,
+        "details_ready": 0,
+        "drafts_generated": 0,
+        "reply_yield_pct": null,
         "responses_failed": 0,
-        "responses_sent": 3,
-        "responses_skipped": 4,
+        "responses_sent": 0,
+        "responses_skipped": 0,
         "responses_unknown": 0
       },
       "db_read_error": false,
       "events_today": {
-        "candidates_created": 7,
+        "candidates_created": 0,
         "chat_replies": 0,
         "chat_send_failed": 0,
-        "details_ready": 7,
-        "draft_sources": {
-          "llm": 3
-        },
-        "drafts_generated": 3,
-        "feed_new_orders": 40,
-        "feed_orders_seen": 46,
+        "details_ready": 0,
+        "draft_sources": {},
+        "drafts_generated": 0,
+        "feed_new_orders": 0,
+        "feed_orders_seen": 0,
         "injection_guard": 0,
         "missing_payment_records": 0,
         "needs_human": 0,
         "recorded_paid_rub": 0,
-        "response_modes": {
-          "commission": 3
-        },
-        "responses_sent": 3,
+        "response_modes": {},
+        "responses_sent": 0,
         "responses_unknown": 0,
-        "sends_started": 3
+        "sends_started": 0
       },
       "inventory_now": {
         "details_errors": 0,
@@ -402,70 +374,45 @@
       },
       "latency_sec": {
         "first_seen_to_details": {
-          "count": 7,
-          "p50": 7,
-          "p90": 12
+          "count": 0,
+          "p50": null,
+          "p90": null
         },
         "first_seen_to_draft": {
-          "count": 3,
-          "p50": 31,
-          "p90": 37
+          "count": 0,
+          "p50": null,
+          "p90": null
         },
         "first_seen_to_sent": {
-          "count": 3,
-          "p50": 89,
-          "p90": 90
+          "count": 0,
+          "p50": null,
+          "p90": null
         }
       },
       "runtime": {
-        "availability_incidents": 1,
+        "availability_incidents": 0,
         "canonical_log_files": 2,
-        "event_groups": {
-          "errors": 1,
-          "operational": 3,
-          "recovery": 2
-        },
-        "events": {
-          "feed_capture_error": 1,
-          "supervisor_start": 2,
-          "tab_hygiene": 1,
-          "worker_start": 2
-        },
-        "last_seen_at": "2026-09-16T21:31:39",
-        "sources_seen_today": [
-          "supervisor",
-          "worker"
-        ],
-        "supervisor_seen_today": true,
-        "worker_seen_today": true
+        "event_groups": {},
+        "events": {},
+        "last_seen_at": null,
+        "sources_seen_today": [],
+        "supervisor_seen_today": false,
+        "worker_seen_today": false
       }
     }
   },
   "code_revision": "4a49e6d5adb6",
-  "date": "2026-09-16",
-  "generated_at": "2026-09-16T22:01:11+05:00",
+  "date": "2026-09-13",
+  "generated_at": "2026-09-16T22:01:09+05:00",
   "logs": {
-    "availability_incidents": 2,
-    "event_groups": {
-      "errors": 5,
-      "operational": 7,
-      "recovery": 6
-    },
-    "events": {
-      "feed_ambiguous": 4,
-      "feed_capture_error": 1,
-      "supervisor_start": 6,
-      "tab_hygiene": 1,
-      "worker_start": 6
-    },
+    "availability_incidents": 0,
+    "event_groups": {},
+    "events": {},
     "files_scanned": 12,
     "ignored_diagnostic_files": 3,
     "ignored_other_log_files": 3,
-    "levels": {
-      "error": 5,
-      "warning": 5
-    },
-    "lines_for_day": 756
+    "levels": {},
+    "lines_for_day": 0
   },
   "privacy": {
     "aggregate_only": true,
@@ -480,38 +427,34 @@
   "timezone": "Asia/Yekaterinburg",
   "totals": {
     "cohort_first_seen_today": {
-      "candidates": 34,
-      "client_replied": 1,
-      "details_ready": 34,
-      "drafts_generated": 16,
-      "reply_yield_pct": 2.9,
-      "responses_failed": 3,
-      "responses_sent": 16,
-      "responses_skipped": 15,
+      "candidates": 0,
+      "client_replied": 0,
+      "details_ready": 0,
+      "drafts_generated": 0,
+      "reply_yield_pct": null,
+      "responses_failed": 0,
+      "responses_sent": 0,
+      "responses_skipped": 0,
       "responses_unknown": 0
     },
     "db_read_errors": 0,
     "events_today": {
-      "candidates_created": 34,
-      "chat_replies": 4,
+      "candidates_created": 0,
+      "chat_replies": 0,
       "chat_send_failed": 0,
-      "details_ready": 34,
-      "draft_sources": {
-        "llm": 16
-      },
-      "drafts_generated": 16,
-      "feed_new_orders": 103,
-      "feed_orders_seen": 127,
+      "details_ready": 0,
+      "draft_sources": {},
+      "drafts_generated": 0,
+      "feed_new_orders": 0,
+      "feed_orders_seen": 0,
       "injection_guard": 0,
       "missing_payment_records": 0,
       "needs_human": 0,
       "recorded_paid_rub": 0,
-      "response_modes": {
-        "commission": 16
-      },
-      "responses_sent": 16,
+      "response_modes": {},
+      "responses_sent": 0,
       "responses_unknown": 0,
-      "sends_started": 16
+      "sends_started": 0
     },
     "inventory_now": {
       "details_errors": 36,
@@ -525,12 +468,8 @@
       }
     },
     "runtime": {
-      "availability_incidents": 2,
-      "event_groups": {
-        "errors": 5,
-        "operational": 7,
-        "recovery": 6
-      }
+      "availability_incidents": 0,
+      "event_groups": {}
     }
   }
 }
