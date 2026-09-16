@@ -1,4 +1,4 @@
-# AGENTS.md — profi-agent (Контур A: автоотклики Профи.ру)
+# AGENTS.md — profi-worker (Контур A: автоотклики Профи.ру)
 
 Перед любой работой с браузером/откликами читать `RULES.md` — он обязателен
 и главнее этого файла. Спека: `docs/SPEC.md`, журнал: `docs/JOURNAL.md`.
@@ -12,7 +12,7 @@ LLM-триаж и кастомный текст отклика → отправ�
 ## Запуск (VPS, здесь)
 
 ```bash
-cd /root/profi-agent
+cd /root/profi-worker
 uv sync
 cp .env.example .env        # ZAI_API_KEY, GLM_BASE_URL, LLM_MODEL
 uv run python -m profi llm-check   # проверка LLM

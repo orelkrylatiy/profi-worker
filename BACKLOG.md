@@ -1,4 +1,4 @@
-# Бэклог profi-agent
+# Бэклог profi-worker
 
 > Обновлён 04.09.2026. Текущий основной flow: fast-path — свежий заказ
 > открывается один раз, full gates + LLM/fallback + отправка идут в той же

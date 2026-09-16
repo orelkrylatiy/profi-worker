@@ -1,4 +1,4 @@
-# Stop Windows profi-agent supervisors/workers. Browser processes are intentionally left alive.
+# Stop Windows profi-worker supervisors/workers. Browser processes are intentionally left alive.
 # Usage: powershell -File scripts\stop-win.ps1                # all accounts
 #        powershell -File scripts\stop-win.ps1 -Account info  # one account
 param([string]$Account)
@@ -73,5 +73,5 @@ if ($Account) {
 if ($Account) {
     Write-Host "[$Account] stopped; browser left running"
 } else {
-    Write-Host "all Windows profi-agent processes stopped; browsers left running"
+    Write-Host "all Windows profi-worker processes stopped; browsers left running"
 }

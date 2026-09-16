@@ -195,7 +195,7 @@ OPS_PYTHON=python3
 Пример cron за вчера в 02:30:
 
 ```cron
-30 2 * * * cd /root/profi-agent && OPS_TIMEZONE=Asia/Yekaterinburg bash scripts/ops/daily_publish.sh yesterday >> logs/ops-daily.log 2>&1
+30 2 * * * cd /root/profi-worker && OPS_TIMEZONE=Asia/Yekaterinburg bash scripts/ops/daily_publish.sh yesterday >> logs/ops-daily.log 2>&1
 ```
 
 ## Pre-commit snapshot
@@ -224,5 +224,5 @@ Collector работает по allow-list. В generated JSON не должны 
 После push можно попросить ChatGPT:
 
 ```text
-Посмотри ops/latest.json в profi-agent. Разбери events_today, cohort, inventory, runtime incidents и latency по аккаунтам.
+Посмотри ops/latest.json в profi-worker. Разбери events_today, cohort, inventory, runtime incidents и latency по аккаунтам.
 ```

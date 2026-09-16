@@ -4,7 +4,7 @@
 export PATH=/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Гарантированно онлайн с 18:00 МСК; паузы 60–120 мин, макс 2/день, только 01–14 МСК.
 set -u
-BASE=/root/profi-agent
+BASE=/root/profi-worker
 MSK_H=$(TZ=Europe/Moscow date +%H)
 STATE=$BASE/data/rhythm_state.json
 TODAY=$(date +%F)
