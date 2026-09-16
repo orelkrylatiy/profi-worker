@@ -130,38 +130,38 @@
     },
     "info": {
       "cohort_first_seen_today": {
-        "candidates": 7,
+        "candidates": 29,
         "client_replied": 0,
-        "details_ready": 7,
-        "drafts_generated": 5,
+        "details_ready": 29,
+        "drafts_generated": 11,
         "reply_yield_pct": 0.0,
         "responses_failed": 0,
-        "responses_sent": 5,
-        "responses_skipped": 2,
+        "responses_sent": 11,
+        "responses_skipped": 18,
         "responses_unknown": 0
       },
       "db_read_error": false,
       "events_today": {
-        "candidates_created": 7,
+        "candidates_created": 29,
         "chat_replies": 0,
         "chat_send_failed": 0,
-        "details_ready": 7,
+        "details_ready": 29,
         "draft_sources": {
-          "llm": 5
+          "llm": 11
         },
-        "drafts_generated": 5,
-        "feed_new_orders": 131,
-        "feed_orders_seen": 134,
+        "drafts_generated": 11,
+        "feed_new_orders": 271,
+        "feed_orders_seen": 267,
         "injection_guard": 0,
         "missing_payment_records": 0,
         "needs_human": 0,
         "recorded_paid_rub": 0,
         "response_modes": {
-          "commission": 5
+          "commission": 11
         },
-        "responses_sent": 5,
+        "responses_sent": 11,
         "responses_unknown": 0,
-        "sends_started": 1
+        "sends_started": 7
       },
       "inventory_now": {
         "details_errors": 6,
@@ -169,24 +169,24 @@
         "send_status": {
           "failed": 14,
           "not_sent": 20,
-          "sent": 35,
-          "skipped": 196
+          "sent": 41,
+          "skipped": 214
         }
       },
       "latency_sec": {
         "first_seen_to_details": {
-          "count": 7,
+          "count": 29,
           "p50": 11,
           "p90": 12
         },
         "first_seen_to_draft": {
-          "count": 5,
-          "p50": 33,
-          "p90": 60
+          "count": 11,
+          "p50": 41,
+          "p90": 53
         },
         "first_seen_to_sent": {
-          "count": 5,
-          "p50": 79,
+          "count": 11,
+          "p50": 93,
           "p90": 112
         }
       },
@@ -194,15 +194,15 @@
         "availability_incidents": 0,
         "canonical_log_files": 3,
         "event_groups": {
-          "operational": 2,
-          "recovery": 3
+          "operational": 3,
+          "recovery": 4
         },
         "events": {
           "cdp_reconnect": 1,
-          "supervisor_start": 2,
-          "worker_start": 2
+          "supervisor_start": 3,
+          "worker_start": 3
         },
-        "last_seen_at": "2026-09-15T16:24:06",
+        "last_seen_at": "2026-09-15T23:59:50",
         "sources_seen_today": [
           "supervisor",
           "worker"
@@ -277,28 +277,28 @@
     },
     "lang": {
       "cohort_first_seen_today": {
-        "candidates": 156,
+        "candidates": 256,
         "client_replied": 3,
-        "details_ready": 156,
+        "details_ready": 254,
         "drafts_generated": 21,
-        "reply_yield_pct": 1.9,
-        "responses_failed": 6,
+        "reply_yield_pct": 1.2,
+        "responses_failed": 8,
         "responses_sent": 20,
-        "responses_skipped": 130,
+        "responses_skipped": 228,
         "responses_unknown": 0
       },
       "db_read_error": false,
       "events_today": {
-        "candidates_created": 156,
-        "chat_replies": 7,
+        "candidates_created": 256,
+        "chat_replies": 14,
         "chat_send_failed": 0,
-        "details_ready": 156,
+        "details_ready": 254,
         "draft_sources": {
           "llm": 21
         },
         "drafts_generated": 21,
-        "feed_new_orders": 191,
-        "feed_orders_seen": 198,
+        "feed_new_orders": 301,
+        "feed_orders_seen": 299,
         "injection_guard": 0,
         "missing_payment_records": 1,
         "needs_human": 0,
@@ -312,20 +312,20 @@
         "sends_started": 0
       },
       "inventory_now": {
-        "details_errors": 28,
-        "draft_errors": 48,
+        "details_errors": 30,
+        "draft_errors": 53,
         "send_status": {
-          "failed": 162,
+          "failed": 167,
           "not_sent": 99,
-          "sent": 103,
-          "skipped": 1510,
+          "sent": 116,
+          "skipped": 1617,
           "unknown": 21
         }
       },
       "latency_sec": {
         "first_seen_to_details": {
-          "count": 156,
-          "p50": 11,
+          "count": 254,
+          "p50": 10,
           "p90": 12
         },
         "first_seen_to_draft": {
@@ -340,21 +340,23 @@
         }
       },
       "runtime": {
-        "availability_incidents": 1,
+        "availability_incidents": 2,
         "canonical_log_files": 3,
         "event_groups": {
-          "errors": 53,
-          "operational": 2,
-          "recovery": 3
+          "errors": 56,
+          "operational": 5,
+          "recovery": 5
         },
         "events": {
           "cdp_reconnect": 1,
-          "feed_ambiguous": 1,
-          "supervisor_start": 2,
+          "feed_ambiguous": 2,
+          "order_open_fail": 2,
+          "supervisor_start": 4,
+          "tab_hygiene": 1,
           "traceback": 52,
-          "worker_start": 2
+          "worker_start": 4
         },
-        "last_seen_at": "2026-09-15T16:24:37",
+        "last_seen_at": "2026-09-15T23:59:50",
         "sources_seen_today": [
           "supervisor",
           "worker"
@@ -365,80 +367,80 @@
     },
     "profi3": {
       "cohort_first_seen_today": {
-        "candidates": 15,
-        "client_replied": 0,
-        "details_ready": 15,
-        "drafts_generated": 9,
-        "reply_yield_pct": 0.0,
-        "responses_failed": 1,
-        "responses_sent": 9,
-        "responses_skipped": 5,
+        "candidates": 59,
+        "client_replied": 1,
+        "details_ready": 59,
+        "drafts_generated": 23,
+        "reply_yield_pct": 1.7,
+        "responses_failed": 4,
+        "responses_sent": 20,
+        "responses_skipped": 35,
         "responses_unknown": 0
       },
       "db_read_error": false,
       "events_today": {
-        "candidates_created": 15,
-        "chat_replies": 2,
+        "candidates_created": 59,
+        "chat_replies": 3,
         "chat_send_failed": 0,
-        "details_ready": 15,
+        "details_ready": 59,
         "draft_sources": {
-          "llm": 9
+          "llm": 23
         },
-        "drafts_generated": 9,
-        "feed_new_orders": 196,
-        "feed_orders_seen": 198,
+        "drafts_generated": 23,
+        "feed_new_orders": 412,
+        "feed_orders_seen": 410,
         "injection_guard": 0,
         "missing_payment_records": 1,
         "needs_human": 0,
         "recorded_paid_rub": 0,
         "response_modes": {
-          "commission": 9,
+          "commission": 20,
           "unknown": 1
         },
-        "responses_sent": 9,
+        "responses_sent": 20,
         "responses_unknown": 1,
-        "sends_started": 4
+        "sends_started": 18
       },
       "inventory_now": {
         "details_errors": 0,
         "draft_errors": 0,
         "send_status": {
-          "failed": 16,
-          "sent": 57,
-          "skipped": 55,
+          "failed": 19,
+          "sent": 71,
+          "skipped": 89,
           "unknown": 4
         }
       },
       "latency_sec": {
         "first_seen_to_details": {
-          "count": 15,
+          "count": 59,
           "p50": 7,
           "p90": 8
         },
         "first_seen_to_draft": {
-          "count": 9,
-          "p50": 32,
-          "p90": 51
+          "count": 23,
+          "p50": 33,
+          "p90": 46
         },
         "first_seen_to_sent": {
-          "count": 9,
-          "p50": 74,
-          "p90": 104
+          "count": 20,
+          "p50": 78,
+          "p90": 102
         }
       },
       "runtime": {
         "availability_incidents": 0,
         "canonical_log_files": 2,
         "event_groups": {
-          "operational": 2,
-          "recovery": 3
+          "operational": 3,
+          "recovery": 4
         },
         "events": {
           "cdp_reconnect": 1,
-          "supervisor_start": 2,
-          "worker_start": 2
+          "supervisor_start": 3,
+          "worker_start": 3
         },
-        "last_seen_at": "2026-09-15T16:24:49",
+        "last_seen_at": "2026-09-15T23:59:50",
         "sources_seen_today": [
           "supervisor",
           "worker"
@@ -448,31 +450,33 @@
       }
     }
   },
-  "code_revision": "072d2fef1b5c",
+  "code_revision": "8e9bf12c7e16",
   "date": "2026-09-15",
-  "generated_at": "2026-09-15T16:25:08+05:00",
+  "generated_at": "2026-09-16T22:01:48+05:00",
   "logs": {
-    "availability_incidents": 1,
+    "availability_incidents": 2,
     "event_groups": {
-      "errors": 53,
-      "operational": 6,
-      "recovery": 9
+      "errors": 56,
+      "operational": 11,
+      "recovery": 13
     },
     "events": {
       "cdp_reconnect": 3,
-      "feed_ambiguous": 1,
-      "supervisor_start": 6,
+      "feed_ambiguous": 2,
+      "order_open_fail": 2,
+      "supervisor_start": 10,
+      "tab_hygiene": 1,
       "traceback": 52,
-      "worker_start": 6
+      "worker_start": 10
     },
     "files_scanned": 12,
     "ignored_diagnostic_files": 3,
     "ignored_other_log_files": 3,
     "levels": {
-      "error": 53,
-      "warning": 6
+      "error": 56,
+      "warning": 23
     },
-    "lines_for_day": 9242
+    "lines_for_day": 14941
   },
   "privacy": {
     "aggregate_only": true,
@@ -487,57 +491,57 @@
   "timezone": "Asia/Yekaterinburg",
   "totals": {
     "cohort_first_seen_today": {
-      "candidates": 178,
-      "client_replied": 3,
-      "details_ready": 178,
-      "drafts_generated": 35,
-      "reply_yield_pct": 1.7,
-      "responses_failed": 7,
-      "responses_sent": 34,
-      "responses_skipped": 137,
+      "candidates": 344,
+      "client_replied": 4,
+      "details_ready": 342,
+      "drafts_generated": 55,
+      "reply_yield_pct": 1.2,
+      "responses_failed": 12,
+      "responses_sent": 51,
+      "responses_skipped": 281,
       "responses_unknown": 0
     },
     "db_read_errors": 0,
     "events_today": {
-      "candidates_created": 178,
-      "chat_replies": 9,
+      "candidates_created": 344,
+      "chat_replies": 17,
       "chat_send_failed": 0,
-      "details_ready": 178,
+      "details_ready": 342,
       "draft_sources": {
-        "llm": 35
+        "llm": 55
       },
-      "drafts_generated": 35,
-      "feed_new_orders": 518,
-      "feed_orders_seen": 530,
+      "drafts_generated": 55,
+      "feed_new_orders": 984,
+      "feed_orders_seen": 976,
       "injection_guard": 0,
       "missing_payment_records": 2,
       "needs_human": 0,
       "recorded_paid_rub": 0,
       "response_modes": {
-        "commission": 34,
+        "commission": 51,
         "unknown": 2
       },
-      "responses_sent": 34,
+      "responses_sent": 51,
       "responses_unknown": 2,
-      "sends_started": 5
+      "sends_started": 25
     },
     "inventory_now": {
-      "details_errors": 34,
-      "draft_errors": 59,
+      "details_errors": 36,
+      "draft_errors": 64,
       "send_status": {
-        "failed": 192,
+        "failed": 200,
         "not_sent": 119,
-        "sent": 195,
-        "skipped": 1761,
+        "sent": 228,
+        "skipped": 1920,
         "unknown": 25
       }
     },
     "runtime": {
-      "availability_incidents": 1,
+      "availability_incidents": 2,
       "event_groups": {
-        "errors": 53,
-        "operational": 6,
-        "recovery": 9
+        "errors": 56,
+        "operational": 11,
+        "recovery": 13
       }
     }
   }
