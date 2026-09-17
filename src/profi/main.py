@@ -847,6 +847,19 @@ CHAT_SYSTEM = (
 # не был дан) — дальше окно закрывается, чтобы не жечь LLM на мёртвом диалоге.
 _CHAT_RETRY_WINDOW_S = 2 * 60 * 60
 
+# Диалог, придавленный системной строкой («Робот: Сообщите, если договоритесь…»),
+# не виден в таргетинге сайдбара. Если инспекция нашла в нём НЕотвеченный вопрос
+# клиента — окно ответа длиннее обычного: это наш пропуск, отвечаем и поздно
+# (инцидент 16.09 «Надежда»: вопрос про цену молчал 25,5 ч).
+_CHAT_BURIED_WINDOW_S = _env_int("PROFI_CHAT_BURIED_WINDOW_H", 48) * 3600
+
+# Как часто перекрывать системные диалоги, где по chat_log мы «уже ответили»:
+# клиент мог задать НОВЫЙ вопрос, снова придавленный системной строкой.
+_CHAT_INSPECT_INTERVAL_S = _env_int("PROFI_CHAT_INSPECT_INTERVAL_MIN", 30) * 60
+
+# Системные события chat_log, которые НЕ решение, а сбой — диалог ретраится.
+_RETRYABLE_SYSTEM_PREFIXES = ("SEND_FAILED", "LLM_JSON_ERROR")
+
 
 def _chat_target(store: Store, d: dict) -> bool:
     """Кому отвечаем: последнее сообщение — от клиента И мы на него ещё не
@@ -866,21 +879,59 @@ def _chat_target(store: Store, d: dict) -> bool:
     last_text = ev[0][1] if ev else ""
     recent = bool(ev) and (time.time() - ev[0][2]) < _CHAT_RETRY_WINDOW_S
     # Решение по последнему сообщению уже принято (NEEDS_HUMAN / NUDGE_LIMIT /
-    # INJECTION_GUARD) — не переигрываем его; SEND_FAILED — не решение, а сбой.
-    decided = last_sender == "system" and not last_text.startswith("SEND_FAILED")
+    # INJECTION_GUARD) — не переигрываем его; SEND_FAILED/LLM_JSON_ERROR —
+    # не решение, а сбой.
+    decided = last_sender == "system" and not last_text.startswith(
+        _RETRYABLE_SYSTEM_PREFIXES
+    )
     if d["unread"] > 0:
         return not decided
     if not ev or last_sender == "client":
         # клиент написал, нашего ответа в логе нет — ретраим в окне 2 часа
         return recent
-    if last_sender == "system" and last_text.startswith("SEND_FAILED"):
-        # одна неудача — пробуем ещё раз; две SEND_FAILED в хвосте — сдаёмся
+    if last_sender == "system" and last_text.startswith(_RETRYABLE_SYSTEM_PREFIXES):
+        # одна неудача — пробуем ещё раз; две подряд — сдаёмся
         # (каждая попытка перелогирует client-ряд, поэтому считаем по хвосту)
         fails = sum(
-            1 for s, t, _ in ev if s == "system" and t.startswith("SEND_FAILED")
+            1
+            for s, t, _ in ev
+            if s == "system" and t.startswith(_RETRYABLE_SYSTEM_PREFIXES)
         )
         return recent and fails < 2
     return False
+
+
+def _classify_chat_dialog(store: Store, d: dict) -> tuple[str, str]:
+    """Классификация диалога для чат-авто: ('target'|'skip'|'inspect', причина).
+
+    Инцидент 16.09 («Надежда», «Николай»): после клиентского вопроса площадка
+    вставляет системную строку, она становится последней в превью, unread
+    остаётся 0 — диалог навсегда выпадает из таргетинга. Для системных строк
+    сайдбар не знает, кто писал содержательно; истина — в открытом диалоге.
+    Поэтому такие диалоги либо решаются по chat_log, либо инспектируются.
+    """
+    who = d.get("who_last")
+    if who == "ours":
+        return "skip", "наше последнее"
+    if who == "client":
+        return ("target" if _chat_target(store, d) else "skip"), "клиент последнее"
+    # who == 'system'
+    ev = store.chat_last_events_by_name(d["name"])
+    if not ev:
+        return "inspect", "системная строка, истории нет"
+    last_sender, last_text, last_ts = ev[0]
+    age = time.time() - last_ts
+    if last_sender == "system" and last_text.startswith(_RETRYABLE_SYSTEM_PREFIXES):
+        return ("target" if age < _CHAT_RETRY_WINDOW_S else "skip"), "сбой отправки"
+    if last_sender == "client":
+        if age < _CHAT_BURIED_WINDOW_S:
+            return "target", "вопрос клиента придавлен системной строкой"
+        return "skip", "придавленный вопрос старше окна"
+    # tutor (ответили) / решённое system: клиент мог спросить снова —
+    # периодическая перекрытая проверка вместо вечного скипа
+    if age >= _CHAT_INSPECT_INTERVAL_S:
+        return "inspect", "перепроверка после нашего ответа"
+    return "skip", "уже ответили"
 
 
 def _chat_page():
@@ -893,6 +944,158 @@ def _chat_page():
     browser = pw.chromium.connect_over_cdp(f"http://127.0.0.1:{config.CDP_PORT}")
     page = browser.contexts[0].new_page()
     return pw, browser, page
+
+
+def _chat_llm_plan(chain: list[str]) -> list[tuple[str, int]]:
+    """План попыток LLM для чата: битый JSON часто = обрезание по max_tokens
+    (инциденты 15–16.09 «Unterminated string»/«Expecting value» — ответ
+    тихо пропускался). Первичный ретрай той же модели с большим лимитом,
+    затем фолбэк-модель — как в autopilot."""
+    if not chain:
+        return []
+    return [(chain[0], 1500), (chain[0], 3000)] + [(m, 3000) for m in chain[1:]]
+
+
+def _matches_logged_tutor(store: Store, client_name: str, text: str) -> bool:
+    """Начало текста совпадает с журналированным нашим сообщением —
+    страховка парсера от ложной атрибуции (наши ответы тоже начинаются
+    с имени клиента: «Лия, привет!»)."""
+    if not text:
+        return False
+    for sender, t, _ in store.chat_last_events_by_name(client_name, n=6):
+        if sender != "tutor":
+            continue
+        a, b = t[:40], text[:40]
+        if a and (a.startswith(b) or b.startswith(a)):
+            return True
+    return False
+
+
+def _answer_open_dialog(page, store: Store, d: dict, order_id: str, client_text: str) -> str:
+    """Ответить (LLM) в УЖЕ открытый диалог. Гейты как раньше: лимит
+    сообщений подряд, анти-инъекция, длина, send_reply fail-closed.
+    Возвращает 'sent' | 'silent' | 'failed'."""
+    from datetime import datetime
+
+    from profi import llm as llm_mod
+    from profi.integration import chat as chat_mod
+
+    name = d["name"]
+    # Страховка от догонялок: сколько наших сообщений подряд без
+    # ответа клиента — больше лимита молчим, даже если парсер
+    # снова сойдёт с ума.
+    streak = store.chat_tutor_streak(order_id or "")
+    if order_id and streak >= config.CHAT_MAX_CONSECUTIVE_OURS:
+        store.log_chat(
+            order_id,
+            name,
+            "system",
+            f"NUDGE_LIMIT: {streak} сообщений подряд без ответа клиента",
+        )
+        log.info("чат-авто: %s — %d сообщений подряд без ответа, молчим", name, streak)
+        return "silent"
+    # Логируем сообщение клиента, на которое отвечаем: раньше
+    # клиентские строки вообще не писались в chat_log.
+    if client_text:
+        store.log_chat(order_id, name, "client", client_text)
+    dialog_text = chat_mod.read_dialog_text(page)
+    user_prompt = (
+        f"{_now_ru()} Диалог с клиентом "
+        f"{name} (заказ {order_id or 'неизвестен'}):\n\n{dialog_text[-4000:]}"
+    )
+    verdict = None
+    chat_err: Exception | None = None
+    for m, tok in _chat_llm_plan(llm_mod.models_chain()):
+        try:
+            raw = llm_mod.chat(
+                CHAT_SYSTEM + _style_variation(),
+                user_prompt,
+                temperature=0.5,
+                max_tokens=tok,
+                model=m,
+            )
+            verdict = llm_mod.json_reply(raw)
+            break
+        except Exception as e:
+            chat_err = e
+            log.warning("chat LLM %s (max_tokens=%d): %s", m, tok, e)
+    if verdict is None:
+        if chat_err is not None and llm_mod.is_limit_error(chat_err):
+            _llm_cooldown_set(chat_err)  # дальше чаты тоже молчат до сброса
+        # не тихий скип: сбой виден в chat_log и ретраится (LLM_JSON_ERROR —
+        # не решение, см. _RETRYABLE_SYSTEM_PREFIXES)
+        store.log_chat(order_id, name, "system", f"LLM_JSON_ERROR: {str(chat_err)[:160]}")
+        log.error("чат-авто: %s: LLM не дал JSON после ретраев — остаётся в очереди", name)
+        return "failed"
+    if verdict.get("needs_human"):
+        store.log_chat(
+            order_id, name, "system", f"NEEDS_HUMAN: {verdict.get('note', '')[:200]}"
+        )
+        print(f"{name}: needs_human — передаём владельцу")
+        return "silent"
+    reply = str(verdict.get("reply") or "").strip()
+    if len(reply) < 10:
+        return "silent"
+    if has_contacts(reply):
+        store.log_chat(order_id, name, "system", "INJECTION_GUARD: контакты в тексте")
+        print(f"{name}: постчек отклонил текст")
+        return "silent"
+    if len(reply) > 800:
+        cut = max(reply.rfind(c, 0, 800) for c in ".!?")
+        reply = reply[: cut + 1] if cut > 50 else reply[:800]
+    # Однострочный текст: \n в keyboard.type превращается в нажатие
+    # Enter — ответ уехал бы кусками, а в поле остался бы хвост.
+    reply = " ".join(reply.split())
+    if not chat_mod.send_reply(page, reply):
+        store.log_chat(order_id, name, "system", "SEND_FAILED: текст остался в поле")
+        log.error("чат-авто: %s: отправка не подтвердилась", name)
+        return "failed"
+    store.log_chat(order_id, name, "tutor", reply)
+    shot = config.LOG_DIR / "chats" / f"auto_{name}_{datetime.now():%H%M}.png"
+    shot.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        page.screenshot(path=str(shot), full_page=False)
+    except Exception:
+        pass
+    print(f"{name}: ответ отправлен ({len(reply)} симв.) — {shot.name}")
+    log.info("чат-авто: %s: ответ отправлен (%d симв.)", name, len(reply))
+    chat_mod.human_pause(2.0, 4.0)
+    return "sent"
+
+
+def _inspect_system_dialog(page, store: Store, d: dict) -> None:
+    """Инспекция диалога с системной строкой в превью: открыть и понять,
+    кто автор последнего содержательного сообщения.
+
+    Инцидент 16.09: после вопроса клиента («Какова стоимость?») площадка
+    вставляет «Робот: Сообщите…», счётчик unread не поднимается — сайдбар
+    навсегда скрывает вопрос. Здесь истина: если последнее содержательное —
+    вопрос клиента, логируем его (станет целью) и отвечаем сразу.
+    """
+    from profi.integration import chat as chat_mod
+
+    name = d["name"]
+    order_id = chat_mod.open_dialog_by_name(page, name)
+    messages = chat_mod.parse_dialog_texts(chat_mod.main_region_snapshot(page), name)
+    sender, text = chat_mod.last_substantive(messages) or ("", "")
+    if sender == "client":
+        if _matches_logged_tutor(store, name, text):
+            # парсер спутал наше сообщение, начинающееся с имени клиента
+            sender = "ours"
+        else:
+            store.log_chat(order_id, name, "client", text)
+            log.info("чат-инспекция: %s — вопрос клиента был придавлен системной строкой", name)
+            # client-строка уже записана инспекцией — не дублируем в _answer
+            _answer_open_dialog(page, store, d, order_id, "")
+            return
+    store.log_chat(
+        order_id,
+        name,
+        "system",
+        f"OBSERVED: последнее содержательное — "
+        f"{'наше' if sender == 'ours' else 'не найдено'}",
+    )
+    log.info("чат-инспекция: %s — отвечать нечего (последнее: %s)", name, sender or "не найдено")
 
 
 def run_chats() -> int:
@@ -920,18 +1123,17 @@ def run_chats() -> int:
 
 
 def run_chat_auto(ctx=None) -> int:
-    """Ответить (LLM) на непрочитанные диалоги. ≤2 за запуск, анти-инъекция,
+    """Ответить (LLM) на непрочитанные диалоги. ≤2 ответов за запуск, анти-инъекция,
     журнал в chat_log (клиент/tutor/system). Отвечаем только когда последнее
-    сообщение — от клиента (who_last='client'): после нашего ответа диалог
-    молчим до его хода, системные «Робот: …» и ручные ответы владельца
-    («Вы: …») целями не являются; сверх того — лимит сообщений подряд без
-    ответа (CHAT_MAX_CONSECUTIVE_OURS).
+    содержательное сообщение — от клиента (сайдбар или инспекция системной
+    строки): после нашего ответа диалог молчим до его хода, системные
+    «Робот: …» строки больше не глушат вопрос клиента (инцидент 16.09);
+    сверх того — лимит сообщений подряд без ответа (CHAT_MAX_CONSECUTIVE_OURS).
 
     ctx — BrowserContext воркера (чат-чек в его цикле): открываем свою вкладку
     в нём, ибо второй sync-Playwright в том же потоке невозможен. Без ctx —
     своё лёгкое подключение (launchd chat_cron.sh, standalone-запуск).
     """
-    from profi import llm as llm_mod
     from profi.integration import chat as chat_mod
 
     if not in_work_hours():
@@ -946,7 +1148,6 @@ def run_chat_auto(ctx=None) -> int:
         return 0
     pw = browser = page = None
     store = Store(config.DB_PATH)
-    replied = []
     try:
         if ctx is not None:
             page = ctx.new_page()
@@ -954,106 +1155,52 @@ def run_chat_auto(ctx=None) -> int:
             pw, browser, page = _chat_page()
         chat_mod.open_chats(page)
         dialogs = chat_mod.list_dialogs(page)
-        # Отвечаем ТОЛЬКО если последнее сообщение ИМЕННО ОТ КЛИЕНТА и мы на
-        # него ещё не ответили (детали в _chat_target). «Вы:» — наше, молчим;
-        # «Робот:» — системное (площадка шлёт его и после наших сообщений —
-        # инцидент 04.09 «8 догонялок Алисе»); непрочитанные не обязательны —
-        # счётчик площадки иногда не поднимается (инцидент 05.09 «Усмонали»).
-        targets = [d for d in dialogs if _chat_target(store, d)][:2]
-        print(f"диалогов: {len(dialogs)}, целей для ответа: {len(targets)}")
+        # Наблюдаемость: каждый видимый диалог попадает в chat_seen — раньше
+        # пропущенные диалоги не были видны нигде (16.09: живых 19, в БД 6).
+        for d in dialogs:
+            try:
+                store.upsert_chat_seen(
+                    d["name"],
+                    "",
+                    d.get("who_last", ""),
+                    d.get("unread", 0),
+                    d.get("preview", ""),
+                )
+            except Exception:
+                log.warning("chat_seen upsert упал: %s", d.get("name"), exc_info=True)
+        # Цели из сайдбара + системные диалоги на инспекцию (детали в
+        # _classify_chat_dialog). «Вы:» — наше, молчим; непрочитанные не
+        # обязательны — счётчик площадки иногда не поднимается (инцидент
+        # 05.09 «Усмонали»).
+        classified = [(d, *_classify_chat_dialog(store, d)) for d in dialogs]
+        targets = [d for d, a, _ in classified if a == "target"][:2]
+        # инспекция дорогая (клик + чтение диалога) — не больше одной за проход
+        inspections = [d for d, a, _ in classified if a == "inspect"][:1]
+        n_system = sum(1 for d in dialogs if d.get("who_last") == "system")
+        print(
+            f"диалогов: {len(dialogs)}, целей для ответа: {len(targets)}, "
+            f"инспекций: {len(inspections)}, системных строк: {n_system}"
+        )
+        log.info(
+            "чат-чек: диалогов=%d целей=%d inspect=%d system=%d",
+            len(dialogs),
+            len(targets),
+            len(inspections),
+            n_system,
+        )
         for d in targets:
             try:
                 order_id = chat_mod.open_dialog_by_name(page, d["name"])
-                # Страховка от догонялок: сколько наших сообщений подряд без
-                # ответа клиента — больше лимита молчим, даже если парсер
-                # снова сойдёт с ума.
-                streak = store.chat_tutor_streak(order_id or "")
-                if order_id and streak >= config.CHAT_MAX_CONSECUTIVE_OURS:
-                    store.log_chat(
-                        order_id,
-                        d["name"],
-                        "system",
-                        f"NUDGE_LIMIT: {streak} сообщений подряд без ответа клиента",
-                    )
-                    log.info(
-                        "чат-авто: %s — %d сообщений подряд без ответа, молчим",
-                        d["name"],
-                        streak,
-                    )
-                    continue
-                # Логируем сообщение клиента, на которое отвечаем: раньше
-                # клиентские строки вообще не писались в chat_log.
-                if d.get("last_text"):
-                    store.log_chat(order_id, d["name"], "client", d["last_text"])
-                dialog_text = chat_mod.read_dialog_text(page)
-                user_prompt = (
-                    f"{_now_ru()} Диалог с клиентом "
-                    f"{d['name']} (заказ {order_id or 'неизвестен'}):\n\n{dialog_text[-4000:]}"
-                )
-                verdict = None
-                chat_err: Exception | None = None
-                for m in llm_mod.models_chain():
-                    try:
-                        raw = llm_mod.chat(
-                            CHAT_SYSTEM + _style_variation(),
-                            user_prompt,
-                            temperature=0.5,
-                            max_tokens=1500,
-                            model=m,
-                        )
-                        verdict = llm_mod.json_reply(raw)
-                        break
-                    except Exception as e:
-                        chat_err = e
-                        log.warning("chat LLM %s: %s", m, e)
-                if verdict is None:
-                    if chat_err is not None and llm_mod.is_limit_error(chat_err):
-                        _llm_cooldown_set(chat_err)  # дальше чаты тоже молчат до сброса
-                    print(f"{d['name']}: LLM не дал JSON — пропускаем")
-                    continue
-                if verdict.get("needs_human"):
-                    store.log_chat(
-                        order_id,
-                        d["name"],
-                        "system",
-                        f"NEEDS_HUMAN: {verdict.get('note', '')[:200]}",
-                    )
-                    print(f"{d['name']}: needs_human — передаём владельцу")
-                    continue
-                reply = str(verdict.get("reply") or "").strip()
-                if len(reply) < 10:
-                    continue
-                if has_contacts(reply):
-                    store.log_chat(
-                        order_id, d["name"], "system", "INJECTION_GUARD: контакты в тексте"
-                    )
-                    print(f"{d['name']}: постчек отклонил текст")
-                    continue
-                if len(reply) > 800:
-                    cut = max(reply.rfind(c, 0, 800) for c in ".!?")
-                    reply = reply[: cut + 1] if cut > 50 else reply[:800]
-                # Однострочный текст: \\n в keyboard.type превращается в нажатие
-                # Enter — ответ уехал бы кусками, а в поле остался бы хвост.
-                reply = " ".join(reply.split())
-                if not chat_mod.send_reply(page, reply):
-                    store.log_chat(
-                        order_id, d["name"], "system", "SEND_FAILED: текст остался в поле"
-                    )
-                    log.error("chat-auto: %s: отправка не подтвердилась", d["name"])
-                    continue
-                store.log_chat(order_id, d["name"], "tutor", reply)
-                replied.append((d["name"], reply))
-                shot = config.LOG_DIR / "chats" / f"auto_{d['name']}_{datetime.now():%H%M}.png"
-                shot.parent.mkdir(parents=True, exist_ok=True)
-                try:
-                    page.screenshot(path=str(shot), full_page=False)
-                except Exception:
-                    pass
-                print(f"{d['name']}: ответ отправлен ({len(reply)} симв.) — {shot.name}")
-                chat_mod.human_pause(2.0, 4.0)
+                _answer_open_dialog(page, store, d, order_id, d.get("last_text", ""))
             except Exception:
                 # один упавший диалог не валит остальные (паритет с автопилотом)
                 log.exception("chat-auto: диалог %s упал — идём дальше", d.get("name"))
+                continue
+        for d in inspections:
+            try:
+                _inspect_system_dialog(page, store, d)
+            except Exception:
+                log.exception("chat-auto: инспекция %s упала — идём дальше", d.get("name"))
                 continue
         return 0
     finally:

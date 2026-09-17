@@ -132,6 +132,90 @@ def list_dialogs(page: Page) -> list[dict]:
     return dialogs
 
 
+# Системные строки площадки ВНУТРИ диалога (в сайдбаре у них маркер «Робот:»).
+# Живой DOM 16.09: такие строки площадка вставляет сразу и после клиентских,
+# и после наших сообщений — в открытой переписке они без имени автора.
+_SYSTEM_MSG_RES = (
+    re.compile(r"^Сообщите, если договоритесь"),
+    re.compile(r"^Если заказ подходит, обменяйтесь"),
+    re.compile(r"^Если заказ не подходит"),
+    re.compile(r"^Клиент отправил вам контакт"),
+    re.compile(r"^Вы отправили клиенту контакт"),
+)
+_TIME_PREFIX_RE = re.compile(r"^(\d{1,2}:\d{2})\s+")
+_MONTH_DAY_PREFIX_RE = re.compile(r"^(\d{1,2}\.\d{1,2}(\.\d{2,4})?|\d{1,2}\s+[а-яё]+)\s+", re.I)
+_WORD_DATE_PREFIX_RE = re.compile(r"^(Сегодня|Вчера)\s+", re.I)
+_ONLY_TIME_OR_DATE_RE = re.compile(
+    r"^(\d{1,2}:\d{2}|\d{1,2}\.\d{1,2}(\.\d{2,4})?|\d{1,2}\s+[а-яё]+|Сегодня|Вчера)$",
+    re.I,
+)
+
+
+def _strip_time_date(s: str) -> str:
+    """Убрать ведущие время/дату («17:52 13 сентября Лия …» → «Лия …»)."""
+    prev = None
+    while prev != s:
+        prev = s
+        s = _TIME_PREFIX_RE.sub("", s)
+        s = _WORD_DATE_PREFIX_RE.sub("", s)
+        s = _MONTH_DAY_PREFIX_RE.sub("", s)
+    return s.strip()
+
+
+def classify_dialog_message(text: str, client_name: str) -> tuple[str, str] | None:
+    """Классифицировать - text:-строку открытого диалога.
+
+    Возвращает (sender, text) c sender 'client'|'ours'|'system', или None для
+    строк-разметки (чистое время/дата, шапка, кнопки).
+
+    Правила живого DOM (16.09): сообщения клиента идут с префиксом имени
+    («Надежда Пара вопросов…»), наши — без имени и часто с ведущей датой
+    («Сегодня стоимость…», «17:36 Вчера Да, конечно…»), системные — без имени,
+    но с узнаваемым текстом («Сообщите, если договоритесь…»). Обращение к
+    клиенту по имени через запятую («Лия, привет!») — наше: после имени ЗАПЯТАЯ,
+    а не пробел.
+    """
+    s = text.strip().strip('"').strip()
+    if not s or _ONLY_TIME_OR_DATE_RE.match(s):
+        return None
+    bare = _strip_time_date(s)
+    if not bare:
+        return None
+    if any(rx.match(bare) for rx in _SYSTEM_MSG_RES):
+        return "system", bare
+    if client_name and (bare == client_name or bare.startswith(client_name + " ")):
+        return "client", bare[len(client_name) :].strip() or bare
+    return "ours", bare
+
+
+def main_region_snapshot(page: Page) -> str:
+    """Aria-снапшот области открытого диалога (после '- main:')."""
+    snap = page.locator("body").aria_snapshot()
+    i = snap.find("- main:")
+    return snap[i:] if i != -1 else snap
+
+
+def parse_dialog_texts(snapshot: str, client_name: str) -> list[tuple[str, str]]:
+    """Сообщения открытого диалога из aria-снапшота: [(sender, text), …]."""
+    out: list[tuple[str, str]] = []
+    for line in snapshot.splitlines():
+        s = line.strip()
+        if not s.startswith("- text: "):
+            continue
+        classified = classify_dialog_message(s[len("- text: ") :].strip(), client_name)
+        if classified is not None:
+            out.append(classified)
+    return out
+
+
+def last_substantive(messages: list[tuple[str, str]]) -> tuple[str, str] | None:
+    """Последнее НЕсистемное сообщение (системные строки — обёртка площадки)."""
+    for sender, text in reversed(messages):
+        if sender != "system":
+            return sender, text
+    return None
+
+
 def open_dialog_by_name(page: Page, name: str) -> str:
     """Клик по строке диалога; возвращает order_id из URL (или '').
 

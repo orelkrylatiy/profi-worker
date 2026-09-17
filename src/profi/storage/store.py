@@ -61,6 +61,20 @@ CREATE TABLE IF NOT EXISTS chat_log (
     text         TEXT,
     created_at   INTEGER NOT NULL
 );
+
+-- Наблюдаемость чатов: что воркер ВИДЕЛ в сайдбаре (слепая зона до 16.09:
+-- chat_log хранит только обработанное; живых диалогов было 19, в БД — 6).
+-- Одна строка на диалог (name, order_id), состояние обновляется на каждом чат-чеке.
+CREATE TABLE IF NOT EXISTS chat_seen (
+    client_name  TEXT NOT NULL,
+    order_id     TEXT NOT NULL DEFAULT '',
+    who_last     TEXT,
+    unread       INTEGER,
+    preview      TEXT,
+    first_seen_at INTEGER NOT NULL,
+    seen_at      INTEGER NOT NULL,
+    PRIMARY KEY (client_name, order_id)
+);
 """
 
 VIEW_SCHEMA = """
@@ -445,6 +459,26 @@ class Store:
                 break
             streak += 1
         return streak
+
+    def upsert_chat_seen(
+        self, client_name: str, order_id: str, who_last: str, unread: int, preview: str
+    ) -> None:
+        """Запомнить состояние диалога, виденное в сайдбаре (наблюдаемость).
+
+        order_id неизвестен до открытия диалога — тогда '' (диалоги с
+        одинаковым именем без order_id схлопнутся в одну строку — принято:
+        сайдбар не даёт стабильного id, см. BACKLOG про dialog identity).
+        """
+        now = int(time.time())
+        self.conn.execute(
+            "INSERT INTO chat_seen (client_name, order_id, who_last, unread, preview, "
+            "first_seen_at, seen_at) VALUES (?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT (client_name, order_id) DO UPDATE SET "
+            "who_last=excluded.who_last, unread=excluded.unread, "
+            "preview=excluded.preview, seen_at=excluded.seen_at",
+            (client_name, order_id or "", who_last, unread, preview[:400], now, now),
+        )
+        self.conn.commit()
 
     def chat_last_events_by_name(
         self, client_name: str, n: int = 3

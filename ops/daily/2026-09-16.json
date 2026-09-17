@@ -285,7 +285,7 @@
       "db_read_error": false,
       "events_today": {
         "candidates_created": 25,
-        "chat_replies": 3,
+        "chat_replies": 4,
         "chat_send_failed": 0,
         "details_ready": 25,
         "draft_sources": {
@@ -441,9 +441,9 @@
       }
     }
   },
-  "code_revision": "7896a35a8e7f",
+  "code_revision": "e20e9ec0994c",
   "date": "2026-09-16",
-  "generated_at": "2026-09-16T22:02:00+05:00",
+  "generated_at": "2026-09-16T22:03:11+05:00",
   "logs": {
     "availability_incidents": 2,
     "event_groups": {
@@ -493,7 +493,7 @@
     "db_read_errors": 0,
     "events_today": {
       "candidates_created": 34,
-      "chat_replies": 4,
+      "chat_replies": 5,
       "chat_send_failed": 0,
       "details_ready": 34,
       "draft_sources": {
