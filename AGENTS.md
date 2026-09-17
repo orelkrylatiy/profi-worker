@@ -46,6 +46,14 @@ powershell scripts\stop-win.ps1 -Account info
 powershell scripts\stop-win.ps1
 ```
 
+Автостарт после ребута/входа в Windows (инцидент 16.09: 3 ребута — 16 ч
+простоя): задача Task Scheduler `ProfiWorkerAutostart` при входе пользователя
+запускает `scripts\ops\autostart-win.ps1`, который поднимает supervisor на
+каждый `accounts/*.env` (start-win идемпотентен, Chrome поднимает supervisor).
+Регистрация/удаление: `powershell scripts\ops\register-autostart.ps1 [-Remove]`,
+лог `logs\autostart.log`. Отключить аккаунт от автостарта — переименовать
+его `accounts/<акк>.env` в `*.disabled`.
+
 Жизненный цикл:
 
 ```text

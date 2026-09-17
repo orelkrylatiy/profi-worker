@@ -150,8 +150,8 @@
           "llm": 3
         },
         "drafts_generated": 3,
-        "feed_new_orders": 18,
-        "feed_orders_seen": 28,
+        "feed_new_orders": 19,
+        "feed_orders_seen": 29,
         "injection_guard": 0,
         "missing_payment_records": 0,
         "needs_human": 0,
@@ -410,7 +410,7 @@
         "canonical_log_files": 2,
         "event_groups": {},
         "events": {},
-        "last_seen_at": "2026-09-17T09:31:01",
+        "last_seen_at": "2026-09-17T09:32:03",
         "sources_seen_today": [
           "worker"
         ],
@@ -419,9 +419,9 @@
       }
     }
   },
-  "code_revision": "e20e9ec0994c",
+  "code_revision": "667103b551da",
   "date": "2026-09-17",
-  "generated_at": "2026-09-17T09:31:53+05:00",
+  "generated_at": "2026-09-17T09:32:30+05:00",
   "logs": {
     "availability_incidents": 0,
     "event_groups": {},
@@ -432,7 +432,7 @@
     "levels": {
       "warning": 5
     },
-    "lines_for_day": 1472
+    "lines_for_day": 1476
   },
   "privacy": {
     "aggregate_only": true,
@@ -467,8 +467,8 @@
         "llm": 18
       },
       "drafts_generated": 18,
-      "feed_new_orders": 68,
-      "feed_orders_seen": 105,
+      "feed_new_orders": 69,
+      "feed_orders_seen": 106,
       "injection_guard": 0,
       "missing_payment_records": 0,
       "needs_human": 0,
