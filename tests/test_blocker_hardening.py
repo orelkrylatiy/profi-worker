@@ -6,6 +6,8 @@ import os
 import subprocess
 import sys
 
+import pytest
+
 from profi.browser import BROWSER_OFFLINE, BrowserManager
 from profi.integration.orders import _payload_order_id, _responses_for_order
 
@@ -91,6 +93,7 @@ def test_valid_respond_modes_still_import():
         assert proc.stdout.strip() == mode
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="flock-перезапуск — VPS/Linux-механика")
 def test_account_autopilot_restart_uses_same_worker_flock(tmp_path):
     fake_flock = tmp_path / "flock"
     fake_flock.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
